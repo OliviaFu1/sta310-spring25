@@ -1,0 +1,193 @@
+---
+title: "STA310 HW1"
+format: pdf
+editor: visual
+author: "Olivia Fu"
+date: "2025-01-20"
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r load-packages}
+
+library(tidyverse)
+library(tidymodels)
+library(knitr)
+library(ggplot2)
+```
+
+## Exercise 1
+
+### (a)
+
+The response variable is the number of cricket chirps per minute.
+
+The predictor variable is temperature at the recorded time.
+
+### (b)
+
+$$
+y_{i} = \mu_i + \epsilon_{i} = x_i^T \beta + \epsilon_{i}
+$$
+
+More specifically:
+
+With intercept:
+
+$$
+\text{number of cricket chirps per minute}_i = \beta_0 + \beta_1 \text{ temperature}_i + \epsilon_{i}
+$$
+
+Without intercept:
+
+$$
+\text{number of cricket chirps per minute}_i = \beta_1 \text{ temperature}_i + \epsilon_{i}
+$$
+
+### (c)
+
+**Linearity**: The relationship between mean of the number of cricket chirps per minute (response Y) and temperature at the recorded time (predictor X) is linear.
+
+**Independence**: Each observation of the cricket chirps and temperature pair is independent of the others. There is connection between how far any two data points lie from the regression line.
+
+**Normality**: The number of cricket chirps per minute (response Y) follows a normal distribution at each level/value of temperature (predictor X).
+
+**Equal variance**: Variance of the number of cricket chirps per minute (response Y) is constant across all values of temperature.
+
+## Exercise 2
+
+### (a)
+
+The response variable is postnatal depression, specifically patients' depression scores.
+
+The predictor variable is whether or not an estrogen patch is used.
+
+### (b) !! ASK
+
+Violation of independence: depression scores were recorded on 6 different visits
+
+Violation of normality: depression score may be skewed as it's less likely to have severely depressed patients?
+
+## Exercise 3
+
+### (a)
+
+In this new model, we include year as an additional predictor variable alongside track conditions. As observed in the exploratory data analysis before, winning speed varies over time, indicating that year has an impact on winning speed. This model allows us to estimate the difference in winning speeds between fast and non-fast track conditions for a given year. By doing so, it separates the effect of track conditions from the trends over time. When interpreting $\beta_2$, it represents the effect of track conditions on winning speed while controlling the time factor. Therefore, it's important to state "holding year constant".
+
+### (b)
+
+The equation provides the estimated values of $Y_i$ based on the fitted regression model. This is a regression equation that estimates the function based on the sample data. The error term accounts for random variation not explained by the deterministic component of the model. However, since the regression equation focuses on predicted values, it does not include the potential deviations of actual observations from the predicted values.
+
+## Exercise 4
+
+### (a)
+
+```{r read-data-4}
+house <- read.csv("~/Desktop/STA310/sta310-spring25/HW1/kingCountyHouses.csv")
+```
+
+```{r fit-model1}
+lm(price ~ sqft, data = house) |>
+  tidy() |>
+  kable(digits = 4)
+```
+
+The slope coefficient of model 1 is 280.6236. In this context, when the interior square footage (sqft) increases by 100, we expect the selling price of the house to increase by 28062.36 dollars, on average.
+
+### (b)
+
+```{r fit-model2}
+
+house <- house |>
+  mutate(logprice = log(price))
+
+lm(logprice ~ sqft, data = house) |>
+  tidy() |>
+  kable(digits = 4)
+```
+
+The slope coefficient of model 2 is 0.0004. In this context, when the interior square footage (sqft) increases by 100, the log of the house price is expected to increase by 0.04, on average.
+
+### (c)
+
+Based on model 2, when the interior square footage (sqft) increases by 100, the house price is expected to multiply by a factor of 1.0408 (exp(0.04)), on average.
+
+### (d)
+
+```{r fit-model3}
+
+house <- house |>
+  mutate(logsqft = log(sqft))
+
+lm(price ~ logsqft, data = house) |>
+  tidy() |>
+  kable(digits = 4)
+
+```
+
+The slope coefficient of model 3 is 528647.5. In this context, a 10% increase in interior square footage (sqft) corresponds to the logsqft to increase by 0.09531 (log(1.1)). Therefore, when sqft increases by 10%, the house price is expected to increase by $528647.5 \times 0.09531 = 50385.39$ dollars, on average.
+
+## Exercise 5
+
+### (a)
+
+```{r read-data-5}
+college <- read.csv("~/Desktop/STA310/sta310-spring25/HW1/college-data.csv")
+```
+
+```{r}
+ggplot(data = college, aes(x = early_career_pay)) + 
+  geom_histogram(fill = "lightblue", color = "white") +
+  labs(x = "Early Career Pay (in US dollars)", 
+       y = "Count",
+       title = "Distribution of Early Career Pay") +
+  theme_minimal()
+```
+
+The early career pay of college students approximately follows a normal distribution, but it‘s slightly right-skewed. The distribution is centered around \$48,000, with frequencies gradually decreasing on both sides. There are a few data points with very high early career pay, resulting in a long tail on the right side of the distribution.
+
+### (b)
+
+```{r}
+ggplot(data = college, aes(x = type, y = early_career_pay)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(x = "Types of School", 
+       y = "Early Career Pay (Dollars)",
+       title = "The Relationship Between Early Career Pay and School Type") +
+  theme_minimal()
+```
+
+As observed from the graph, the median of early career pay for private school students is slightly higher than that of students graduated from public schools. Furthermore, a greater number of private school graduates have an early career pay exceeding \$70,000 compared to public school graduates.
+
+```{r}
+ggplot(data = college, aes(x = stem_percent, y = early_career_pay)) +
+  geom_point() +
+  labs(x = "Percent of STEM degrees", 
+       y = "Early Career Pay (Dollars)",
+       title = "The Relationship Between Early Career Pay and Percent of STEM degrees") +
+  theme_minimal()
+```
+
+As observed from the graph, there is a positive relationship between the percentage of STEM degrees awarded and graduates' early career pay, which means that schools with a higher percentage of STEM degrees tend to have higher early career pay. Most data points are concentrated between 0% and 50% STEM degrees, while those above 50% are more scattered.
+
+### (c)
+
+```{r}
+lm(early_career_pay ~ out_of_state_total + type + stem_percent + type * stem_percent, 
+   data = college) |>
+  tidy(conf.int = TRUE, conf.level = 0.95) |>
+  kable(digits = 3)
+```
+
+### (d)
+
+There are $n-p-1=593-4-1=588$ degrees of freedom in the estimate of the regression standard error.
+
+### (e) ??
+
+## Exercise 6
