@@ -1,7 +1,63 @@
 ---
-title: "HW1"
+title: "STA310 HW1"
 format: pdf
 editor: visual
+author: "Olivia Fu"
+date: "2025-01-20"
 ---
 
-## HW1
+## Exercise 1
+
+### (a)
+
+The response variable is the number of cricket chirps per minute.
+
+The predictor variable is temperature at the recorded time.
+
+### (b)
+
+$$
+y_{i} = \mu_i + \epsilon_{i} = x_i^T \beta + \epsilon_{i}
+$$
+
+### (c)
+
+**Linearity**: The relationship between mean of the number of cricket chirps per minute (response Y) and temperature at the recorded time (predictor X) is linear.
+
+**Independence**: Each observation of the cricket chirps and temperature pair is independent of the others. There is connection between how far any two data points lie from the regression line.
+
+**Normality**: The number of cricket chirps per minute (response Y) follows a normal distribution at each level/value of temperature (predictor X).
+
+**Equal variance**: Variance of the number of cricket chirps per minute (response Y) is constant across all values of temperature.
+
+## Exercise 2
+
+### (a)
+
+The response variable is postnatal depression, specifically patients' depression scores.
+
+The predictor variable is whether or not an estrogen patch is used.
+
+### (b) cont
+
+Violation of independence: depression scores were recorded on 6 different visits
+
+Violation of normality: depression score may be skewed as it's less likely to have severely depressed patients?
+
+## Exercise 3
+
+### (a)
+
+### (b)
+
+### (c)
+
+## Exercise 4
+
+### (a)
+
+### (b)
+
+### (c)
+
+### (d)
