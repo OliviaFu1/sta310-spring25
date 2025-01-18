@@ -1,0 +1,15 @@
+---
+title: "STA310 HW1"
+format: pdf
+editor: visual
+author: "Olivia Fu"
+date: "2025-01-20"
+---
+
+```{r}
+{r include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+)
+```
