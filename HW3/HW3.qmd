@@ -1,0 +1,227 @@
+---
+title: "STA310 HW3"
+format: pdf
+editor: visual
+author: "Olivia Fu"
+date: "2025-02-07"
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r}
+library(ggplot2)
+```
+
+## Exercise 1
+
+The probability mass function of a Poisson random variable is given by:
+
+$$
+P(X = x) = \frac{\lambda^x e^{-\lambda}}{x!}, \quad x = 0, 1, 2, \dots
+$$
+
+The likelihood function is:
+
+$$
+\begin{aligned}L(\lambda) &= \prod_{i=1}^n P(X_i = x_i)\\&= \prod_{i=1}^n \frac{\lambda^{x_i} e^{-\lambda}}{x_i!}\\&= \lambda^{\sum_{i=1}^n x_i} \cdot e^{-n\lambda} \cdot \prod_{i=1}^n \frac{1}{x_i!}\end{aligned}
+$$
+
+\clearpage
+
+## Exercise 2
+
+The log-likelihood function is:
+
+$$
+\begin{aligned}\ell(\lambda) &= \log L(\lambda) \\&=\log \left( \lambda^{\sum_{i=1}^n x_i}\cdot e^{-n\lambda} \cdot \prod_{i=1}^n \frac{1}{x_i!} \right)\\&= \log(\lambda^{\sum_{i=1}^n x_i}) + \log(e^{-n\lambda}) + \log(\prod_{i=1}^n \frac{1}{x_i!})\\&= \sum_{i=1}^n x_i \cdot \log \lambda - n\lambda + \sum_{i=1}^n \log \frac{1}{x_i!}\end{aligned}
+$$
+
+The first derivative of the log-likelihood function is:
+
+$$
+\frac{\partial \ell(\lambda)}{\partial \lambda} = \frac{\sum_{i=1}^n x_i}{\lambda} - n
+$$
+
+We then set the derivative equal to zero to find the MLE:
+
+$$
+\begin{aligned} \frac{\sum_{i=1}^n x_i}{\hat{\lambda}} - n = 0& \\\hat{\lambda} = \frac{\sum_{i=1}^n x_i}{n}&\end{aligned}
+$$
+
+The second derivative of the log-likelihood function is:
+
+$$
+\frac{\partial^2 \ell(\lambda)}{\partial \lambda^2} = -\frac{\sum_{i=1}^n x_i}{\lambda^2}
+$$
+
+Since $\lambda > 0$ and $x_i \geq 0$, the second derivative is negative (exclude the trivial case where all $x_i=0$), confirming that the critical point corresponds to a maximum.
+
+\clearpage
+
+## Exercise 3
+
+```{r}
+# Given data
+n <- 100
+sum_x <- 500
+
+# Log-likelihood function for Poisson distribution
+log_likelihood_function <- function(lambda) {
+  if (lambda <= 0) {
+    return(-Inf)
+  } else {
+    # The constant term can be ignored as 
+    # it does not affect the maximization of the log-likelihood
+    return(sum_x * log(lambda) - n * lambda)
+  }
+}
+
+# Set up a sequence of lambda values
+lambda_values <- seq(1, 10, length.out = 100000)
+
+# Calculate the log-likelihood for each lambda
+log_likelihood_values <- sapply(lambda_values, log_likelihood_function)
+
+# Find the lambda that maximizes the log-likelihood
+mle_lambda <- lambda_values[which.max(log_likelihood_values)]
+
+# Print the MLE for lambda
+cat("MLE for lambda:", mle_lambda, "\n")
+```
+
+```{r}
+# Create a dataframe
+data <- data.frame(lambda = lambda_values, log_likelihood = log_likelihood_values)
+
+# Plot
+ggplot(data, aes(x = lambda, y = log_likelihood)) +
+  geom_line(color = "blue", size = 1) +
+  geom_vline(xintercept = mle_lambda, color = "red", linetype = "dashed") +
+  annotate("text", 
+           x = mle_lambda + 0.6, 
+           y = max(log_likelihood_values) - 40,
+           label = paste("MLE =", round(mle_lambda, 3)), 
+           color = "red") +
+  labs(title = "Log-Likelihood for Poisson",
+       x = "Lambda",
+       y = "Log-Likelihood") +
+  theme_minimal()
+```
+
+Therefore, the approximate MLE is 5, which matches the formula we derived in Exercise 2.
+
+$$
+\hat{\lambda} = \frac{\sum_{i=1}^n x_i}{n} = \frac{500}{100}=5
+$$
+
+\clearpage
+
+## Exercise 4
+
+### (a)
+
+| **Game**  | **First five shots** | **Likelihood (no hot hand)** | **Likelihood (hot hand)**                                                                        |
+|---------------|---------------|---------------|---------------------------|
+| 1         | BMMBB                | $p_B^3(1 - p_B)^2$           | $(p_B)(1-p_{B\vert B})(1-p_B)(p_B)(p_{B\vert B}) = (p_B)^2(1-p_{B\vert B})(1-p_B)(p_{B\vert B})$ |
+| 2         | MBMBM                | $p_B^2(1 - p_B)^3$           | $(1-p_B)(p_B)(1-p_{B\vert B})(p_B)(1-p_{B\vert B}) = (p_B)^2(1-p_{B\vert B})^2(1-p_B)$           |
+| 3         | MMBBB                | $p_B^3(1 - p_B)^2$           | $(1-p_B)(1-p_B)(p_B)(p_{B\vert B})(p_{B\vert B}) = (p_B)(1-p_B)^2(p_{B\vert B})^2$               |
+| 4         | BMMMB                | $p_B^2(1 - p_B)^3$           | $(p_B)(1-p_{B\vert B})(1-p_B)(1-p_B)(p_B) = (p_B)^2(1-p_{B\vert B})(1-p_B)^2$                    |
+| 5         | MMMMM                | $(1 - p_B)^5$                | $(1-p_B)(1-p_B)(1-p_B)(1-p_B)(1-p_B) = (1-p_B)^5$                                                |
+|           |                      |                              |                                                                                                  |
+| **Total** |                      | $p_B^{10}(1 - p_B)^{15}$     | $(p_B)^7(1-p_B)^{11}(p_{B\vert B})^3(1-p_{B\vert B})^4$                                          |
+
+### (b)
+
+```{r}
+likelihood <- function(pb){
+  pb^(10) * (1 - pb)^(15)
+}
+likelihood(0.4)
+likelihood(0.3)
+```
+
+When we substitute 0.4 and 0.3 for $p_B$​ in the likelihood function, we find that $p_B=0.4$ produces a higher likelihood than $p_B=0.3$ ($4.93 \times 10^{-8}$ vs. $2.80 \times 10^{-8}$). This means that the data is more consistent with $p_B=0.4$.
+
+Furthermore, intuitively, if the data shows that the player made 10 baskets out of 25 attempts, it makes sense to estimate the probability of making a basket close to 0.4 (10/25), rather than lower values like 0.3, which are less aligned with the observed data.
+
+### (c)
+
+**MLE for No Hot Hand Model**
+
+The likelihood and log-likelihood functions are:
+
+$$
+\begin{aligned}Lik(p_B) &= p_B^{10}(1 - p_B)^{15}\\\log(Lik(p_B)) &= \log(p_B^{10})+\log((1 - p_B)^{15})\\&= 10\log(p_B) + 15\log(1 - p_B)\end{aligned}
+$$
+
+We then take the first derivative of the log-likelihood function and set it to zero:
+
+$$
+\begin{aligned}\frac{d}{dp_B}log(Lik(p_B)) &= \frac{10}{p_B}-\frac{15}{1-p_B} = 0\\&\Rightarrow \frac{10}{p_B} = \frac{15}{1-p_B}\\&\Rightarrow 10(1-p_B)=15p_B\\&\Rightarrow 25p_B = 10\\&\hat{p_B} = \frac{10}{25} = 0.4\end{aligned}
+$$
+
+**MLE for Hot Hand Model**
+
+The likelihood and log-likelihood functions are:
+
+$$
+$\begin{aligned}Lik(p_B, p_{B\vert B}) &= (p_B)^7(1-p_B)^{11}(p_{B\vert B})^3(1-p_{B\vert B})^4\\\log(Lik(p_B, p_{B\vert B})) &= \log((p_B)^7)+\log((1-p_B)^{11})+\log((p_{B\vert B})^3)+\log((1-p_{B\vert B})^4)\\&= 7\log((p_B))+11\log((1-p_B))+3\log((p_{B\vert B}))+4\log((1-p_{B\vert B}))\end{aligned}$
+$$
+
+We then take the first derivative of the log-likelihood function (with respect to $p_B$ and $p_{B \vert B}$ separately) and set them to zero:
+
+$$
+\begin{aligned}\frac{d}{dp_B}log(Lik(p_B, p_{B\vert B})) &= \frac{7}{p_B}-\frac{11}{1-p_B} = 0\\&\Rightarrow \frac{7}{p_B} = \frac{11}{1-p_B}\\&\Rightarrow 7(1-p_B)=11p_B\\&\Rightarrow 18p_B = 7\\&\hat{p_B} = \frac{7}{18} = 0.3889\\\\\frac{d}{dp_{B\vert B}}log(Lik(p_B, p_{B\vert B})) &= \frac{3}{p_{B\vert B}}-\frac{4}{1-p_{B\vert B}} = 0\\&\Rightarrow \frac{3}{p_{B\vert B}} = \frac{4}{1-p_{B\vert B}}\\&\Rightarrow 3(1-p_{B\vert B})=4p_{B\vert B}\\&\Rightarrow 7p_{B\vert B} = 3\\&\hat{p_{B \vert B}} = \frac{3}{7} = 0.4286\end{aligned}
+$$
+
+**Likelihood Ratio Test (LRT)**
+
+No Hot Hand Model: $p_B$
+
+Hot Hand Model: $p_B, p_{B \vert B}$
+
+Hypothesis:
+
+$H_0:p_B=p_{B \vert B}$
+
+$H_0:p_B \neq p_{B \vert B}$
+
+Firstly, we need to plug the MLEs into the log-likelihood function for each model to get the maximum value of the log-likelihood for each model.
+
+```{r}
+loglik1 <- function(pb){
+  log(pb^(10) * (1 - pb)^(15))
+}
+loglik1(10/25)
+```
+
+```{r}
+loglik2 <- function(pb, pbb) {
+  log(pb^7 * (1-pb)^(11) * pbb^3 * (1-pbb)^4)
+}
+loglik2(7/18, 3/7)
+```
+
+Then, we use the Likelihood Ratio Test to determine if the difference is statistically significant
+
+```{r}
+LRT <- 2 * (loglik2(7/18, 3/7) - loglik1(10/25))
+LRT
+```
+
+Therefore, LRT = 0.03292.
+
+The test statistic follows a $\chi^2$ distribution with 1 degrees of freedom (the difference in the number of parameters between the two models). Therefore, the p-value is $P(\chi^2>LRT)$.
+
+```{r}
+pchisq(LRT, 1, lower.tail = FALSE)
+```
+
+Therefore, p-value = 0.8560.
+
+The p-value is very larger, so we fail to reject $H_0$. We don't have convincing evidence that the hot hand model (conditional model) is an improvement over the no hot hand model (unconditional model). Thus, **there is no significant evidence that the hod hand exists**.

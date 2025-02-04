@@ -94,7 +94,7 @@ The equation provides the predicted values of $Y_i$ based on the fitted regressi
 ### (a)
 
 ```{r read-data-4}
-house <- read.csv("~/Desktop/STA310/sta310-spring25/HW1/kingCountyHouses.csv")
+house <- read.csv("./kingCountyHouses.csv")
 ```
 
 ```{r fit-model1}
@@ -149,7 +149,7 @@ The slope coefficient of model 3 is 528647.5. In this context, a 10% increase in
 ### (a)
 
 ```{r read-data-5}
-college <- read.csv("~/Desktop/STA310/sta310-spring25/HW1/college-data.csv")
+college <- read.csv("./college-data.csv")
 ```
 
 ```{r}
