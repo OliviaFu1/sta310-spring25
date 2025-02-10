@@ -13,7 +13,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r}
+```{r load-library}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
 library(ggplot2)
 ```
 
@@ -82,7 +85,8 @@ log_likelihood_function <- function(lambda) {
 }
 
 # Set up a sequence of lambda values
-lambda_values <- seq(1, 10, length.out = 100000)
+# Start from 0.1 to avoid lambda = 0 resulting in -Inf log-likelihood
+lambda_values <- seq(0.1, 10, length.out = 100000)
 
 # Calculate the log-likelihood for each lambda
 log_likelihood_values <- sapply(lambda_values, log_likelihood_function)
@@ -91,20 +95,21 @@ log_likelihood_values <- sapply(lambda_values, log_likelihood_function)
 mle_lambda <- lambda_values[which.max(log_likelihood_values)]
 
 # Print the MLE for lambda
-cat("MLE for lambda:", mle_lambda, "\n")
+cat("MLE for lambda:", round(mle_lambda, 3), "\n")
 ```
 
 ```{r}
 # Create a dataframe
-data <- data.frame(lambda = lambda_values, log_likelihood = log_likelihood_values)
+data <- data.frame(lambda = lambda_values, 
+                   log_likelihood = log_likelihood_values)
 
 # Plot
 ggplot(data, aes(x = lambda, y = log_likelihood)) +
-  geom_line(color = "blue", size = 1) +
+  geom_line(size = 1) +
   geom_vline(xintercept = mle_lambda, color = "red", linetype = "dashed") +
   annotate("text", 
-           x = mle_lambda + 0.6, 
-           y = max(log_likelihood_values) - 40,
+           x = mle_lambda + 0.8, 
+           y = max(log_likelihood_values) - 100,
            label = paste("MLE =", round(mle_lambda, 3)), 
            color = "red") +
   labs(title = "Log-Likelihood for Poisson",
@@ -126,7 +131,7 @@ $$
 ### (a)
 
 | **Game**  | **First five shots** | **Likelihood (no hot hand)** | **Likelihood (hot hand)**                                                                        |
-|---------------|---------------|---------------|---------------------------|
+|-----------|----------------------|------------------------------|--------------------------------------------------------------------------------------------------|
 | 1         | BMMBB                | $p_B^3(1 - p_B)^2$           | $(p_B)(1-p_{B\vert B})(1-p_B)(p_B)(p_{B\vert B}) = (p_B)^2(1-p_{B\vert B})(1-p_B)(p_{B\vert B})$ |
 | 2         | MBMBM                | $p_B^2(1 - p_B)^3$           | $(1-p_B)(p_B)(1-p_{B\vert B})(p_B)(1-p_{B\vert B}) = (p_B)^2(1-p_{B\vert B})^2(1-p_B)$           |
 | 3         | MMBBB                | $p_B^3(1 - p_B)^2$           | $(1-p_B)(1-p_B)(p_B)(p_{B\vert B})(p_{B\vert B}) = (p_B)(1-p_B)^2(p_{B\vert B})^2$               |
@@ -170,7 +175,7 @@ $$
 The likelihood and log-likelihood functions are:
 
 $$
-$\begin{aligned}Lik(p_B, p_{B\vert B}) &= (p_B)^7(1-p_B)^{11}(p_{B\vert B})^3(1-p_{B\vert B})^4\\\log(Lik(p_B, p_{B\vert B})) &= \log((p_B)^7)+\log((1-p_B)^{11})+\log((p_{B\vert B})^3)+\log((1-p_{B\vert B})^4)\\&= 7\log((p_B))+11\log((1-p_B))+3\log((p_{B\vert B}))+4\log((1-p_{B\vert B}))\end{aligned}$
+\begin{aligned}Lik(p_B, p_{B\vert B}) &= (p_B)^7(1-p_B)^{11}(p_{B\vert B})^3(1-p_{B\vert B})^4\\\log(Lik(p_B, p_{B\vert B})) &= \log((p_B)^7)+\log((1-p_B)^{11})+\log((p_{B\vert B})^3)+\log((1-p_{B\vert B})^4)\\&= 7\log((p_B))+11\log((1-p_B))+3\log((p_{B\vert B}))+4\log((1-p_{B\vert B}))\end{aligned}
 $$
 
 We then take the first derivative of the log-likelihood function (with respect to $p_B$ and $p_{B \vert B}$ separately) and set them to zero:
@@ -187,9 +192,12 @@ Hot Hand Model: $p_B, p_{B \vert B}$
 
 Hypothesis:
 
-$H_0:p_B=p_{B \vert B}$
-
-$H_0:p_B \neq p_{B \vert B}$
+$$
+\begin{aligned}
+&H_0:p_B=p_{B \vert B}\\
+&H_a:p_B \neq p_{B \vert B}
+\end{aligned}
+$$
 
 Firstly, we need to plug the MLEs into the log-likelihood function for each model to get the maximum value of the log-likelihood for each model.
 
@@ -224,4 +232,4 @@ pchisq(LRT, 1, lower.tail = FALSE)
 
 Therefore, p-value = 0.8560.
 
-The p-value is very larger, so we fail to reject $H_0$. We don't have convincing evidence that the hot hand model (conditional model) is an improvement over the no hot hand model (unconditional model). Thus, **there is no significant evidence that the hod hand exists**.
+The p-value is very large (0.8560 \> 0.05), so we fail to reject $H_0$. We don't have convincing evidence that the hot hand model (conditional model) is an improvement over the no hot hand model (unconditional model). Thus, **there is no significant evidence that the hot hand exists**.
